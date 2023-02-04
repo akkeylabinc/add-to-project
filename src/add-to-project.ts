@@ -37,8 +37,8 @@ interface ProjectV2AddDraftIssueResponse {
 }
 
 export async function addToProject(): Promise<void> {
-  const projectUrl = core.getInput('project-url', {required: true})
-  const ghToken = core.getInput('github-token', {required: true})
+  const projectUrl = core.getInput('project-url', { required: true })
+  const ghToken = core.getInput('github-token', { required: true })
   const labeled =
     core
       .getInput('labeled')
@@ -46,11 +46,12 @@ export async function addToProject(): Promise<void> {
       .map(l => l.trim().toLowerCase())
       .filter(l => l.length > 0) ?? []
   const labelOperator = core.getInput('label-operator').trim().toLocaleLowerCase()
+  const issueId = core.getInput('issue-id')
 
   const octokit = github.getOctokit(ghToken)
 
   const issue = github.context.payload.issue ?? github.context.payload.pull_request
-  const issueLabels: string[] = (issue?.labels ?? []).map((l: {name: string}) => l.name.toLowerCase())
+  const issueLabels: string[] = (issue?.labels ?? []).map((l: { name: string }) => l.name.toLowerCase())
   const issueOwnerName = github.context.payload.repository?.owner.login
 
   core.debug(`Issue/PR owner: ${issueOwnerName}`)
@@ -108,7 +109,7 @@ export async function addToProject(): Promise<void> {
   )
 
   const projectId = idResp[ownerTypeQuery]?.projectV2.id
-  const contentId = issue?.node_id
+  const contentId = issueId ?? issue?.node_id
 
   core.debug(`Project node ID: ${projectId}`)
   core.debug(`Content ID: ${contentId}`)
