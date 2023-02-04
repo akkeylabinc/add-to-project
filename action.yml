@@ -16,9 +16,9 @@ inputs:
   label-operator:
     required: false
     description: The behavior of the labels filter, AND to match all labels, OR to match any label, NOT to exclude any listed label (default is OR)
-  issue-id:
+  issue-node-id:
     required: false
-    description: Issue id is used when manually specifying an issue
+    description: Issue node id is used when manually specifying an issue
 runs:
   using: 'node16'
   main: 'dist/index.js'
