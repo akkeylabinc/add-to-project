@@ -56,6 +56,7 @@ function addToProject() {
             .map(l => l.trim().toLowerCase())
             .filter(l => l.length > 0)) !== null && _a !== void 0 ? _a : [];
         const labelOperator = core.getInput('label-operator').trim().toLocaleLowerCase();
+        const issueId = core.getInput('issue-id');
         const octokit = github.getOctokit(ghToken);
         const issue = (_b = github.context.payload.issue) !== null && _b !== void 0 ? _b : github.context.payload.pull_request;
         const issueLabels = ((_c = issue === null || issue === void 0 ? void 0 : issue.labels) !== null && _c !== void 0 ? _c : []).map((l) => l.name.toLowerCase());
@@ -101,10 +102,10 @@ function addToProject() {
       }
     }`, {
             projectOwnerName,
-            projectNumber
+            projectNumber,
         });
         const projectId = (_j = idResp[ownerTypeQuery]) === null || _j === void 0 ? void 0 : _j.projectV2.id;
-        const contentId = issue === null || issue === void 0 ? void 0 : issue.node_id;
+        const contentId = issueId !== null && issueId !== void 0 ? issueId : issue === null || issue === void 0 ? void 0 : issue.node_id;
         core.debug(`Project node ID: ${projectId}`);
         core.debug(`Content ID: ${contentId}`);
         // Next, use the GraphQL API to add the issue to the project.
@@ -112,6 +113,8 @@ function addToProject() {
         // add a project item. Otherwise, we add a draft issue.
         if (issueOwnerName === projectOwnerName) {
             core.info('Creating project item');
+            core.info(`issue id: ${issueId}`);
+            core.info(`issue node id: ${issue === null || issue === void 0 ? void 0 : issue.node_id}`);
             const addResp = yield octokit.graphql(`mutation addIssueToProject($input: AddProjectV2ItemByIdInput!) {
         addProjectV2ItemById(input: $input) {
           item {
@@ -121,8 +124,8 @@ function addToProject() {
       }`, {
                 input: {
                     projectId,
-                    contentId
-                }
+                    contentId,
+                },
             });
             core.setOutput('itemId', addResp.addProjectV2ItemById.item.id);
         }
@@ -139,7 +142,7 @@ function addToProject() {
         }
       }`, {
                 projectId,
-                title: issue === null || issue === void 0 ? void 0 : issue.html_url
+                title: issue === null || issue === void 0 ? void 0 : issue.html_url,
             });
             core.setOutput('itemId', addResp.addProjectV2DraftIssue.projectItem.id);
         }
